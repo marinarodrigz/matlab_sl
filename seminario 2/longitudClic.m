@@ -11,7 +11,7 @@ y vamos incrementando "paso" el valor de la posición.
 El primer valor se toma cuando el valor de la y es distinta de 0
 El último valor se toma si el valor anterior es 0 y el actual también
 %}
-function [ media ] = longitudClic (locs, muestra, longitud_izq, paso)
+function [ media ] = longitudClic (locs, muestra, longitud_izq, paso, valor_max)
     
     % Variable para almacenar la media (será devuelta)
     media = 0;
@@ -70,10 +70,16 @@ function [ media ] = longitudClic (locs, muestra, longitud_izq, paso)
             x_inicio = x_inicio + (paso * 10^-6) * j / 100;
         end
         
-        % Se suma a la media la diferencia del último valor y el primero
-        media = media + (ultimo_valor - primer_valor;);
+        valor = (ultimo_valor - primer_valor);
+        
+        % Comprobación de que sea menor que el valor máximo admitido
+        % para evitar grandes errores de medida
+        if valor < valor_max
+            % Se suma a la media la diferencia del último valor y el primero
+            media = media + valor;
+        end
     end
-    
+   
     % Divide la media por el número de picos
     media = media / muestra;
     
