@@ -18,9 +18,11 @@ figure(1)
 plot(tt,xx)
 title('CalderonGris.wav');
 xlabel('tiempo (s)');
-
+%% QUITAR RUIDO
+yy=(abs(xx)>6*10^-3).*xx;
+figure(2)
+plot(tt,yy)
 %% TRANSFORMADA
-
 clic=yy(63.1656*fs:63.1659*fs);
 figure;
 plot(clic);
@@ -39,22 +41,40 @@ title('Espectro de amplitud de un clic');
 xlabel('Frequencia (Hz)')
 ylabel('|Y(f)|_{normalizado}')
 
-%% PSD DENSIDAD ESPECTRAL DE POTENCIA
+%% CÁLCULO DE PSD DENSIDAD ESPECTRAL DE POTENCIA PARA HALLAR EL RANGO DE FRECUENCIA
 figure(5)
 PSD=Y(1:NFFT/2+1,1).*conj(Y(1:NFFT/2+1,1));
 plot(freq, PSD)
-
-%% QUITAR RUIDO
-yy=(abs(xx)>5*10^-3).*xx;
-figure(2)
-plot(tt,yy)
+% Encontramos el pico más alto de la gráfica
+[y_max, idx] = max(PSD);
+x_max = freq(idx);
+disp(['La frecuencia de la señal es ', num2str(x_max),+'Hz'])
 
 %% FINDPEAKS
+%{
+ locs es un vector que contiene los tiempos en segundos en los que se 
+ encuentran los máximos locales (clics) en la señal de sonido
+ (0.2 es separación mínima entre clics)
+ %}
 
-[pks,locs]=findpeaks(yy, tt, 'MinPeakDistance',0.2);
+[pks,locs]=findpeaks(xx, tt,'MinPeakDistance',0.2);  
 
-ICIs = diff(locs); %Calcular las distancias entre los elementos del vector
+%Representación picos
+figure(6)
+plot(tt,yy,'b',locs,pks,'or');
+xlabel('tiempo (s)');
+ylabel('Amplitud');
+title('Picos detectados con la función findpeaks');
 
-ICI = mean(ICIs); %Media de esas distancias
+% La función "diff" toma la diferencia entre cada elemento consecutivo
+% del vector "locs" para calcular los intervalos de clics    
+IntervaloICI = diff(locs);
+% calcula la media de los intervalos interclics
+ICI = mean(IntervaloICI);
 
-fprintf('La distancia temporal promedio entre picos es %f segundos\n', ICI);
+fprintf('La distancia temporal promedio entre picos es %f s\n', ICI);
+
+%% CALCULAR LONGITUD CLIC
+media = longitudClic (locs, 50, 40, 25, 50,30, yy, fs);
+fprintf('La longitud media de los clicks es %f s\n', media);
+

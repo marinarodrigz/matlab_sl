@@ -45,26 +45,41 @@ title('Espectro de amplitud de un clic');
 xlabel('Frequencia (Hz)')
 ylabel('|Y(f)|_{normalizado}')
 
-%% PSD DENSIDAD ESPECTRAL DE POTENCIA
+%% CÁLCULO DE PSD DENSIDAD ESPECTRAL DE POTENCIA PARA HALLAR EL RANGO DE FRECUENCIA
 figure(5)
 PSD=Y(1:NFFT/2+1,1).*conj(Y(1:NFFT/2+1,1));
 plot(freq, PSD)
+% Encontramos el pico más alto de la gráfica
+[y_max, idx] = max(PSD);
+x_max = freq(idx);
+disp(['La frecuencia de la señal es ', num2str(x_max),+'Hz'])
 
 %% FINDPEAKS
-% Encontrar los índices correspondientes a los tiempos deseados
-t_start = 80;
-t_end = 88;
-idx_start = find(tt >= t_start, 1);
-idx_end = find(tt >= t_end, 1);
 
-% Recortar los vectores tt e yy
-tt_recortado = tt(idx_start:idx_end);
-yy_recortado = yy(idx_start:idx_end);
+%{
+ locs es un vector que contiene los tiempos en segundos en los que se 
+ encuentran los máximos locales (clics) en la señal de sonido
+ (0.2 es separación mínima entre clics)
+ %}
 
-[pks,locs]=findpeaks(yy_recortado, tt_recortado, 'MinPeakDistance',0.1);
+[pks,locs]=findpeaks(xx, tt,'MinPeakDistance',0.2);  
 
-ICIs = diff(locs); %Calcular las distancias entre los elementos del vector
+%Representación picos
+figure(6)
+plot(tt,yy,'b',locs,pks,'or');
+xlabel('tiempo (s)');
+ylabel('Amplitud');
+title('Picos detectados con la función findpeaks');
 
-ICI = mean(ICIs); %Media de esas distancias
+% La función "diff" toma la diferencia entre cada elemento consecutivo
+% del vector "locs" para calcular los intervalos de clics    
+IntervaloICI = diff(locs);
+% calcula la media de los intervalos interclics
+ICI = mean(IntervaloICI);
 
-fprintf('La distancia temporal promedio entre picos es %f segundos\n', ICI);
+fprintf('La distancia temporal promedio entre picos es %f s\n', ICI);
+
+%% CALCULAR LONGITUD CLIC
+media = longitudClic (locs,50, 135, 25, 271, 100, yy, fs);
+fprintf('La longitud media de los clicks es %f s\n', media);
+

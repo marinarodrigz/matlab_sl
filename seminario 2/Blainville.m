@@ -48,6 +48,10 @@ ylabel('|Y(f)|_{normalizado}')
 figure(5)
 PSD=Y(1:NFFT/2+1,1).*conj(Y(1:NFFT/2+1,1));
 plot(freq, PSD)
+% Encontramos el pico más alto de la gráfica
+[y_max, idx] = max(PSD);
+x_max = freq(idx);
+disp(['La frecuencia de la señal es ', num2str(x_max),+'Hz'])
 
 %% FINDPEAKS
 
@@ -57,13 +61,10 @@ plot(freq, PSD)
  (0.2 es separación mínima entre clics)
  %}
 
-[pks,locs]=findpeaks(xx, tt, 'MinPeakDistance',0.2);  
-
-
-
+[pks,locs]=findpeaks(xx, tt,'MinPeakDistance',0.2);  
 
 %Representación picos
-
+figure(6)
 plot(tt,yy,'b',locs,pks,'or');
 xlabel('tiempo (s)');
 ylabel('Amplitud');
@@ -75,8 +76,9 @@ IntervaloICI = diff(locs);
 % calcula la media de los intervalos interclics
 ICI = mean(IntervaloICI);
 
-fprintf('La distancia temporal promedio entre picos es %f segundos\n', ICI);
+fprintf('La distancia temporal promedio entre picos es %f s\n', ICI);
 
-fprintf("@@@@@@@@@@@@@@@@@@\n\n");
-
+%% CALCULAR LONGITUD CLIC
+media = longitudClic (locs, 5, 135, 25, 271, 100, yy, fs);
+fprintf('La longitud media de los clicks es %f s\n', media);
 
